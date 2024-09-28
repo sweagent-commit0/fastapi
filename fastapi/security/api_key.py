@@ -1,5 +1,4 @@
 from typing import Optional
-
 from fastapi.openapi.models import APIKey, APIKeyIn
 from fastapi.security.base import SecurityBase
 from starlette.exceptions import HTTPException
@@ -7,10 +6,8 @@ from starlette.requests import Request
 from starlette.status import HTTP_403_FORBIDDEN
 from typing_extensions import Annotated, Doc
 
-
 class APIKeyBase(SecurityBase):
     pass
-
 
 class APIKeyQuery(APIKeyBase):
     """
@@ -44,58 +41,8 @@ class APIKeyQuery(APIKeyBase):
     ```
     """
 
-    def __init__(
-        self,
-        *,
-        name: Annotated[
-            str,
-            Doc("Query parameter name."),
-        ],
-        scheme_name: Annotated[
-            Optional[str],
-            Doc(
-                """
-                Security scheme name.
-
-                It will be included in the generated OpenAPI (e.g. visible at `/docs`).
-                """
-            ),
-        ] = None,
-        description: Annotated[
-            Optional[str],
-            Doc(
-                """
-                Security scheme description.
-
-                It will be included in the generated OpenAPI (e.g. visible at `/docs`).
-                """
-            ),
-        ] = None,
-        auto_error: Annotated[
-            bool,
-            Doc(
-                """
-                By default, if the query parameter is not provided, `APIKeyQuery` will
-                automatically cancel the request and send the client an error.
-
-                If `auto_error` is set to `False`, when the query parameter is not
-                available, instead of erroring out, the dependency result will be
-                `None`.
-
-                This is useful when you want to have optional authentication.
-
-                It is also useful when you want to have authentication that can be
-                provided in one of multiple optional ways (for example, in a query
-                parameter or in an HTTP Bearer token).
-                """
-            ),
-        ] = True,
-    ):
-        self.model: APIKey = APIKey(
-            **{"in": APIKeyIn.query},  # type: ignore[arg-type]
-            name=name,
-            description=description,
-        )
+    def __init__(self, *, name: Annotated[str, Doc('Query parameter name.')], scheme_name: Annotated[Optional[str], Doc('\n                Security scheme name.\n\n                It will be included in the generated OpenAPI (e.g. visible at `/docs`).\n                ')]=None, description: Annotated[Optional[str], Doc('\n                Security scheme description.\n\n                It will be included in the generated OpenAPI (e.g. visible at `/docs`).\n                ')]=None, auto_error: Annotated[bool, Doc('\n                By default, if the query parameter is not provided, `APIKeyQuery` will\n                automatically cancel the request and send the client an error.\n\n                If `auto_error` is set to `False`, when the query parameter is not\n                available, instead of erroring out, the dependency result will be\n                `None`.\n\n                This is useful when you want to have optional authentication.\n\n                It is also useful when you want to have authentication that can be\n                provided in one of multiple optional ways (for example, in a query\n                parameter or in an HTTP Bearer token).\n                ')]=True):
+        self.model: APIKey = APIKey(**{'in': APIKeyIn.query}, name=name, description=description)
         self.scheme_name = scheme_name or self.__class__.__name__
         self.auto_error = auto_error
 
@@ -103,13 +50,10 @@ class APIKeyQuery(APIKeyBase):
         api_key = request.query_params.get(self.model.name)
         if not api_key:
             if self.auto_error:
-                raise HTTPException(
-                    status_code=HTTP_403_FORBIDDEN, detail="Not authenticated"
-                )
+                raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail='Not authenticated')
             else:
                 return None
         return api_key
-
 
 class APIKeyHeader(APIKeyBase):
     """
@@ -143,54 +87,8 @@ class APIKeyHeader(APIKeyBase):
     ```
     """
 
-    def __init__(
-        self,
-        *,
-        name: Annotated[str, Doc("Header name.")],
-        scheme_name: Annotated[
-            Optional[str],
-            Doc(
-                """
-                Security scheme name.
-
-                It will be included in the generated OpenAPI (e.g. visible at `/docs`).
-                """
-            ),
-        ] = None,
-        description: Annotated[
-            Optional[str],
-            Doc(
-                """
-                Security scheme description.
-
-                It will be included in the generated OpenAPI (e.g. visible at `/docs`).
-                """
-            ),
-        ] = None,
-        auto_error: Annotated[
-            bool,
-            Doc(
-                """
-                By default, if the header is not provided, `APIKeyHeader` will
-                automatically cancel the request and send the client an error.
-
-                If `auto_error` is set to `False`, when the header is not available,
-                instead of erroring out, the dependency result will be `None`.
-
-                This is useful when you want to have optional authentication.
-
-                It is also useful when you want to have authentication that can be
-                provided in one of multiple optional ways (for example, in a header or
-                in an HTTP Bearer token).
-                """
-            ),
-        ] = True,
-    ):
-        self.model: APIKey = APIKey(
-            **{"in": APIKeyIn.header},  # type: ignore[arg-type]
-            name=name,
-            description=description,
-        )
+    def __init__(self, *, name: Annotated[str, Doc('Header name.')], scheme_name: Annotated[Optional[str], Doc('\n                Security scheme name.\n\n                It will be included in the generated OpenAPI (e.g. visible at `/docs`).\n                ')]=None, description: Annotated[Optional[str], Doc('\n                Security scheme description.\n\n                It will be included in the generated OpenAPI (e.g. visible at `/docs`).\n                ')]=None, auto_error: Annotated[bool, Doc('\n                By default, if the header is not provided, `APIKeyHeader` will\n                automatically cancel the request and send the client an error.\n\n                If `auto_error` is set to `False`, when the header is not available,\n                instead of erroring out, the dependency result will be `None`.\n\n                This is useful when you want to have optional authentication.\n\n                It is also useful when you want to have authentication that can be\n                provided in one of multiple optional ways (for example, in a header or\n                in an HTTP Bearer token).\n                ')]=True):
+        self.model: APIKey = APIKey(**{'in': APIKeyIn.header}, name=name, description=description)
         self.scheme_name = scheme_name or self.__class__.__name__
         self.auto_error = auto_error
 
@@ -198,13 +96,10 @@ class APIKeyHeader(APIKeyBase):
         api_key = request.headers.get(self.model.name)
         if not api_key:
             if self.auto_error:
-                raise HTTPException(
-                    status_code=HTTP_403_FORBIDDEN, detail="Not authenticated"
-                )
+                raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail='Not authenticated')
             else:
                 return None
         return api_key
-
 
 class APIKeyCookie(APIKeyBase):
     """
@@ -238,54 +133,8 @@ class APIKeyCookie(APIKeyBase):
     ```
     """
 
-    def __init__(
-        self,
-        *,
-        name: Annotated[str, Doc("Cookie name.")],
-        scheme_name: Annotated[
-            Optional[str],
-            Doc(
-                """
-                Security scheme name.
-
-                It will be included in the generated OpenAPI (e.g. visible at `/docs`).
-                """
-            ),
-        ] = None,
-        description: Annotated[
-            Optional[str],
-            Doc(
-                """
-                Security scheme description.
-
-                It will be included in the generated OpenAPI (e.g. visible at `/docs`).
-                """
-            ),
-        ] = None,
-        auto_error: Annotated[
-            bool,
-            Doc(
-                """
-                By default, if the cookie is not provided, `APIKeyCookie` will
-                automatically cancel the request and send the client an error.
-
-                If `auto_error` is set to `False`, when the cookie is not available,
-                instead of erroring out, the dependency result will be `None`.
-
-                This is useful when you want to have optional authentication.
-
-                It is also useful when you want to have authentication that can be
-                provided in one of multiple optional ways (for example, in a cookie or
-                in an HTTP Bearer token).
-                """
-            ),
-        ] = True,
-    ):
-        self.model: APIKey = APIKey(
-            **{"in": APIKeyIn.cookie},  # type: ignore[arg-type]
-            name=name,
-            description=description,
-        )
+    def __init__(self, *, name: Annotated[str, Doc('Cookie name.')], scheme_name: Annotated[Optional[str], Doc('\n                Security scheme name.\n\n                It will be included in the generated OpenAPI (e.g. visible at `/docs`).\n                ')]=None, description: Annotated[Optional[str], Doc('\n                Security scheme description.\n\n                It will be included in the generated OpenAPI (e.g. visible at `/docs`).\n                ')]=None, auto_error: Annotated[bool, Doc('\n                By default, if the cookie is not provided, `APIKeyCookie` will\n                automatically cancel the request and send the client an error.\n\n                If `auto_error` is set to `False`, when the cookie is not available,\n                instead of erroring out, the dependency result will be `None`.\n\n                This is useful when you want to have optional authentication.\n\n                It is also useful when you want to have authentication that can be\n                provided in one of multiple optional ways (for example, in a cookie or\n                in an HTTP Bearer token).\n                ')]=True):
+        self.model: APIKey = APIKey(**{'in': APIKeyIn.cookie}, name=name, description=description)
         self.scheme_name = scheme_name or self.__class__.__name__
         self.auto_error = auto_error
 
@@ -293,9 +142,7 @@ class APIKeyCookie(APIKeyBase):
         api_key = request.cookies.get(self.model.name)
         if not api_key:
             if self.auto_error:
-                raise HTTPException(
-                    status_code=HTTP_403_FORBIDDEN, detail="Not authenticated"
-                )
+                raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail='Not authenticated')
             else:
                 return None
         return api_key

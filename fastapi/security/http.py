@@ -1,7 +1,6 @@
 import binascii
 from base64 import b64decode
 from typing import Optional
-
 from fastapi.exceptions import HTTPException
 from fastapi.openapi.models import HTTPBase as HTTPBaseModel
 from fastapi.openapi.models import HTTPBearer as HTTPBearerModel
@@ -12,7 +11,6 @@ from starlette.requests import Request
 from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN
 from typing_extensions import Annotated, Doc
 
-
 class HTTPBasicCredentials(BaseModel):
     """
     The HTTP Basic credentials given as the result of using `HTTPBasic` in a
@@ -21,10 +19,8 @@ class HTTPBasicCredentials(BaseModel):
     Read more about it in the
     [FastAPI docs for HTTP Basic Auth](https://fastapi.tiangolo.com/advanced/security/http-basic-auth/).
     """
-
-    username: Annotated[str, Doc("The HTTP Basic username.")]
-    password: Annotated[str, Doc("The HTTP Basic password.")]
-
+    username: Annotated[str, Doc('The HTTP Basic username.')]
+    password: Annotated[str, Doc('The HTTP Basic password.')]
 
 class HTTPAuthorizationCredentials(BaseModel):
     """
@@ -47,52 +43,25 @@ class HTTPAuthorizationCredentials(BaseModel):
     * `scheme` will have the value `"Bearer"`
     * `credentials` will have the value `"deadbeef12346"`
     """
-
-    scheme: Annotated[
-        str,
-        Doc(
-            """
-            The HTTP authorization scheme extracted from the header value.
-            """
-        ),
-    ]
-    credentials: Annotated[
-        str,
-        Doc(
-            """
-            The HTTP authorization credentials extracted from the header value.
-            """
-        ),
-    ]
-
+    scheme: Annotated[str, Doc('\n            The HTTP authorization scheme extracted from the header value.\n            ')]
+    credentials: Annotated[str, Doc('\n            The HTTP authorization credentials extracted from the header value.\n            ')]
 
 class HTTPBase(SecurityBase):
-    def __init__(
-        self,
-        *,
-        scheme: str,
-        scheme_name: Optional[str] = None,
-        description: Optional[str] = None,
-        auto_error: bool = True,
-    ):
+
+    def __init__(self, *, scheme: str, scheme_name: Optional[str]=None, description: Optional[str]=None, auto_error: bool=True):
         self.model = HTTPBaseModel(scheme=scheme, description=description)
         self.scheme_name = scheme_name or self.__class__.__name__
         self.auto_error = auto_error
 
-    async def __call__(
-        self, request: Request
-    ) -> Optional[HTTPAuthorizationCredentials]:
-        authorization = request.headers.get("Authorization")
+    async def __call__(self, request: Request) -> Optional[HTTPAuthorizationCredentials]:
+        authorization = request.headers.get('Authorization')
         scheme, credentials = get_authorization_scheme_param(authorization)
         if not (authorization and scheme and credentials):
             if self.auto_error:
-                raise HTTPException(
-                    status_code=HTTP_403_FORBIDDEN, detail="Not authenticated"
-                )
+                raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail='Not authenticated')
             else:
                 return None
         return HTTPAuthorizationCredentials(scheme=scheme, credentials=credentials)
-
 
 class HTTPBasic(HTTPBase):
     """
@@ -127,95 +96,33 @@ class HTTPBasic(HTTPBase):
     ```
     """
 
-    def __init__(
-        self,
-        *,
-        scheme_name: Annotated[
-            Optional[str],
-            Doc(
-                """
-                Security scheme name.
-
-                It will be included in the generated OpenAPI (e.g. visible at `/docs`).
-                """
-            ),
-        ] = None,
-        realm: Annotated[
-            Optional[str],
-            Doc(
-                """
-                HTTP Basic authentication realm.
-                """
-            ),
-        ] = None,
-        description: Annotated[
-            Optional[str],
-            Doc(
-                """
-                Security scheme description.
-
-                It will be included in the generated OpenAPI (e.g. visible at `/docs`).
-                """
-            ),
-        ] = None,
-        auto_error: Annotated[
-            bool,
-            Doc(
-                """
-                By default, if the HTTP Basic authentication is not provided (a
-                header), `HTTPBasic` will automatically cancel the request and send the
-                client an error.
-
-                If `auto_error` is set to `False`, when the HTTP Basic authentication
-                is not available, instead of erroring out, the dependency result will
-                be `None`.
-
-                This is useful when you want to have optional authentication.
-
-                It is also useful when you want to have authentication that can be
-                provided in one of multiple optional ways (for example, in HTTP Basic
-                authentication or in an HTTP Bearer token).
-                """
-            ),
-        ] = True,
-    ):
-        self.model = HTTPBaseModel(scheme="basic", description=description)
+    def __init__(self, *, scheme_name: Annotated[Optional[str], Doc('\n                Security scheme name.\n\n                It will be included in the generated OpenAPI (e.g. visible at `/docs`).\n                ')]=None, realm: Annotated[Optional[str], Doc('\n                HTTP Basic authentication realm.\n                ')]=None, description: Annotated[Optional[str], Doc('\n                Security scheme description.\n\n                It will be included in the generated OpenAPI (e.g. visible at `/docs`).\n                ')]=None, auto_error: Annotated[bool, Doc('\n                By default, if the HTTP Basic authentication is not provided (a\n                header), `HTTPBasic` will automatically cancel the request and send the\n                client an error.\n\n                If `auto_error` is set to `False`, when the HTTP Basic authentication\n                is not available, instead of erroring out, the dependency result will\n                be `None`.\n\n                This is useful when you want to have optional authentication.\n\n                It is also useful when you want to have authentication that can be\n                provided in one of multiple optional ways (for example, in HTTP Basic\n                authentication or in an HTTP Bearer token).\n                ')]=True):
+        self.model = HTTPBaseModel(scheme='basic', description=description)
         self.scheme_name = scheme_name or self.__class__.__name__
         self.realm = realm
         self.auto_error = auto_error
 
-    async def __call__(  # type: ignore
-        self, request: Request
-    ) -> Optional[HTTPBasicCredentials]:
-        authorization = request.headers.get("Authorization")
+    async def __call__(self, request: Request) -> Optional[HTTPBasicCredentials]:
+        authorization = request.headers.get('Authorization')
         scheme, param = get_authorization_scheme_param(authorization)
         if self.realm:
-            unauthorized_headers = {"WWW-Authenticate": f'Basic realm="{self.realm}"'}
+            unauthorized_headers = {'WWW-Authenticate': f'Basic realm="{self.realm}"'}
         else:
-            unauthorized_headers = {"WWW-Authenticate": "Basic"}
-        if not authorization or scheme.lower() != "basic":
+            unauthorized_headers = {'WWW-Authenticate': 'Basic'}
+        if not authorization or scheme.lower() != 'basic':
             if self.auto_error:
-                raise HTTPException(
-                    status_code=HTTP_401_UNAUTHORIZED,
-                    detail="Not authenticated",
-                    headers=unauthorized_headers,
-                )
+                raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail='Not authenticated', headers=unauthorized_headers)
             else:
                 return None
-        invalid_user_credentials_exc = HTTPException(
-            status_code=HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication credentials",
-            headers=unauthorized_headers,
-        )
+        invalid_user_credentials_exc = HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail='Invalid authentication credentials', headers=unauthorized_headers)
         try:
-            data = b64decode(param).decode("ascii")
+            data = b64decode(param).decode('ascii')
         except (ValueError, UnicodeDecodeError, binascii.Error):
-            raise invalid_user_credentials_exc  # noqa: B904
-        username, separator, password = data.partition(":")
+            raise invalid_user_credentials_exc
+        username, separator, password = data.partition(':')
         if not separator:
             raise invalid_user_credentials_exc
         return HTTPBasicCredentials(username=username, password=password)
-
 
 class HTTPBearer(HTTPBase):
     """
@@ -249,77 +156,25 @@ class HTTPBearer(HTTPBase):
     ```
     """
 
-    def __init__(
-        self,
-        *,
-        bearerFormat: Annotated[Optional[str], Doc("Bearer token format.")] = None,
-        scheme_name: Annotated[
-            Optional[str],
-            Doc(
-                """
-                Security scheme name.
-
-                It will be included in the generated OpenAPI (e.g. visible at `/docs`).
-                """
-            ),
-        ] = None,
-        description: Annotated[
-            Optional[str],
-            Doc(
-                """
-                Security scheme description.
-
-                It will be included in the generated OpenAPI (e.g. visible at `/docs`).
-                """
-            ),
-        ] = None,
-        auto_error: Annotated[
-            bool,
-            Doc(
-                """
-                By default, if the HTTP Bearer token not provided (in an
-                `Authorization` header), `HTTPBearer` will automatically cancel the
-                request and send the client an error.
-
-                If `auto_error` is set to `False`, when the HTTP Bearer token
-                is not available, instead of erroring out, the dependency result will
-                be `None`.
-
-                This is useful when you want to have optional authentication.
-
-                It is also useful when you want to have authentication that can be
-                provided in one of multiple optional ways (for example, in an HTTP
-                Bearer token or in a cookie).
-                """
-            ),
-        ] = True,
-    ):
+    def __init__(self, *, bearerFormat: Annotated[Optional[str], Doc('Bearer token format.')]=None, scheme_name: Annotated[Optional[str], Doc('\n                Security scheme name.\n\n                It will be included in the generated OpenAPI (e.g. visible at `/docs`).\n                ')]=None, description: Annotated[Optional[str], Doc('\n                Security scheme description.\n\n                It will be included in the generated OpenAPI (e.g. visible at `/docs`).\n                ')]=None, auto_error: Annotated[bool, Doc('\n                By default, if the HTTP Bearer token not provided (in an\n                `Authorization` header), `HTTPBearer` will automatically cancel the\n                request and send the client an error.\n\n                If `auto_error` is set to `False`, when the HTTP Bearer token\n                is not available, instead of erroring out, the dependency result will\n                be `None`.\n\n                This is useful when you want to have optional authentication.\n\n                It is also useful when you want to have authentication that can be\n                provided in one of multiple optional ways (for example, in an HTTP\n                Bearer token or in a cookie).\n                ')]=True):
         self.model = HTTPBearerModel(bearerFormat=bearerFormat, description=description)
         self.scheme_name = scheme_name or self.__class__.__name__
         self.auto_error = auto_error
 
-    async def __call__(
-        self, request: Request
-    ) -> Optional[HTTPAuthorizationCredentials]:
-        authorization = request.headers.get("Authorization")
+    async def __call__(self, request: Request) -> Optional[HTTPAuthorizationCredentials]:
+        authorization = request.headers.get('Authorization')
         scheme, credentials = get_authorization_scheme_param(authorization)
         if not (authorization and scheme and credentials):
             if self.auto_error:
-                raise HTTPException(
-                    status_code=HTTP_403_FORBIDDEN, detail="Not authenticated"
-                )
+                raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail='Not authenticated')
             else:
                 return None
-        if scheme.lower() != "bearer":
+        if scheme.lower() != 'bearer':
             if self.auto_error:
-                raise HTTPException(
-                    status_code=HTTP_403_FORBIDDEN,
-                    detail="Invalid authentication credentials",
-                )
+                raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail='Invalid authentication credentials')
             else:
                 return None
         return HTTPAuthorizationCredentials(scheme=scheme, credentials=credentials)
-
 
 class HTTPDigest(HTTPBase):
     """
@@ -353,68 +208,19 @@ class HTTPDigest(HTTPBase):
     ```
     """
 
-    def __init__(
-        self,
-        *,
-        scheme_name: Annotated[
-            Optional[str],
-            Doc(
-                """
-                Security scheme name.
-
-                It will be included in the generated OpenAPI (e.g. visible at `/docs`).
-                """
-            ),
-        ] = None,
-        description: Annotated[
-            Optional[str],
-            Doc(
-                """
-                Security scheme description.
-
-                It will be included in the generated OpenAPI (e.g. visible at `/docs`).
-                """
-            ),
-        ] = None,
-        auto_error: Annotated[
-            bool,
-            Doc(
-                """
-                By default, if the HTTP Digest not provided, `HTTPDigest` will
-                automatically cancel the request and send the client an error.
-
-                If `auto_error` is set to `False`, when the HTTP Digest is not
-                available, instead of erroring out, the dependency result will
-                be `None`.
-
-                This is useful when you want to have optional authentication.
-
-                It is also useful when you want to have authentication that can be
-                provided in one of multiple optional ways (for example, in HTTP
-                Digest or in a cookie).
-                """
-            ),
-        ] = True,
-    ):
-        self.model = HTTPBaseModel(scheme="digest", description=description)
+    def __init__(self, *, scheme_name: Annotated[Optional[str], Doc('\n                Security scheme name.\n\n                It will be included in the generated OpenAPI (e.g. visible at `/docs`).\n                ')]=None, description: Annotated[Optional[str], Doc('\n                Security scheme description.\n\n                It will be included in the generated OpenAPI (e.g. visible at `/docs`).\n                ')]=None, auto_error: Annotated[bool, Doc('\n                By default, if the HTTP Digest not provided, `HTTPDigest` will\n                automatically cancel the request and send the client an error.\n\n                If `auto_error` is set to `False`, when the HTTP Digest is not\n                available, instead of erroring out, the dependency result will\n                be `None`.\n\n                This is useful when you want to have optional authentication.\n\n                It is also useful when you want to have authentication that can be\n                provided in one of multiple optional ways (for example, in HTTP\n                Digest or in a cookie).\n                ')]=True):
+        self.model = HTTPBaseModel(scheme='digest', description=description)
         self.scheme_name = scheme_name or self.__class__.__name__
         self.auto_error = auto_error
 
-    async def __call__(
-        self, request: Request
-    ) -> Optional[HTTPAuthorizationCredentials]:
-        authorization = request.headers.get("Authorization")
+    async def __call__(self, request: Request) -> Optional[HTTPAuthorizationCredentials]:
+        authorization = request.headers.get('Authorization')
         scheme, credentials = get_authorization_scheme_param(authorization)
         if not (authorization and scheme and credentials):
             if self.auto_error:
-                raise HTTPException(
-                    status_code=HTTP_403_FORBIDDEN, detail="Not authenticated"
-                )
+                raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail='Not authenticated')
             else:
                 return None
-        if scheme.lower() != "digest":
-            raise HTTPException(
-                status_code=HTTP_403_FORBIDDEN,
-                detail="Invalid authentication credentials",
-            )
+        if scheme.lower() != 'digest':
+            raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail='Invalid authentication credentials')
         return HTTPAuthorizationCredentials(scheme=scheme, credentials=credentials)
